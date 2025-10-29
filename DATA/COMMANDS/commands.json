@@ -1,0 +1,17 @@
+{
+  "open_browser": {
+    "keywords": ["open browser", "launch chrome", "start google", "open internet"],
+    "response": "Opening your browser, sir.",
+    "action": "open_browser"
+  },
+  "play_music": {
+    "keywords": ["play music", "start song", "turn on music"],
+    "response": "Playing your playlist.",
+    "action": "play_music"
+  },
+  "time": {
+    "keywords": ["what time", "tell me the time", "current time"],
+    "response": "The current time is",
+    "action": "tell_time"
+  }
+}
