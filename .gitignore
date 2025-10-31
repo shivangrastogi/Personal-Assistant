@@ -1,7 +1,3 @@
-Backend/DATA/DATA.rar
-Backend/DATA/TTS_MINIMAL
-
-
 # -------------------------------
 # OS / Editor files
 # -------------------------------
@@ -47,3 +43,9 @@ Laptop App/node_modules/
 # Audio output files
 Backend/FUNCTION/SPEAK/outputs/
 *.wav
+
+# Ignore RAR archives
+*.rar
+
+# Ignore TTS_MINIMAL folder
+Backend/DATA/TTS_MINIMAL/
