@@ -1,9 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+// screens/ChatScreen.js
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ChatScreen() {
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [jarvisRunning, setJarvisRunning] = useState(false);
+  const [listening, setListening] = useState(false);
 
+  const BACKEND_URL = "http://192.168.68.119:5000"; // your Flask IP
+
+  // Fetch logs from backend every 2s
   useEffect(() => {
     const interval = setInterval(fetchLogs, 2000);
     return () => clearInterval(interval);
@@ -11,58 +19,148 @@ export default function ChatScreen() {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/get-logs");
+      const res = await fetch(`${BACKEND_URL}/get-logs`);
       const data = await res.json();
-      setLogs(data.logs);
+      setLogs(data.logs || []);
     } catch (err) {
-      console.log(err);
+      console.log("Error fetching logs:", err);
     }
   };
 
+  const startJarvis = async () => {
+    setLoading(true);
+    try {
+      await fetch(`${BACKEND_URL}/start-jarvis`, { method: "POST" });
+      setJarvisRunning(true);
+      setListening(true);
+    } catch (err) {
+      console.log("Error starting Jarvis:", err);
+    }
+    setLoading(false);
+  };
+
+  const stopJarvis = () => {
+    setJarvisRunning(false);
+    setListening(false);
+  };
+
+  const renderItem = ({ item }) => (
+    <View
+      style={[
+        styles.message,
+        item.sender === "User" ? styles.userBubble : styles.jarvisBubble,
+      ]}
+    >
+      <Text style={styles.messageText}>{item.text}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.chatContainer}>
-        {logs.map((msg, index) => (
-          <View
-            key={index}
-            style={[
-              styles.message,
-              msg.sender === "User" ? styles.userMsg : styles.jarvisMsg,
-            ]}
-          >
-            <Text style={styles.msgText}>{msg.text}</Text>
+      <Text style={styles.title}>JARVIS Assistant</Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#00bcd4" />
+      ) : (
+        <>
+          <FlatList
+            data={logs}
+            renderItem={renderItem}
+            keyExtractor={(_, index) => index.toString()}
+            contentContainerStyle={{ paddingBottom: 100 }}
+          />
+
+          {listening && (
+            <View style={styles.listeningContainer}>
+              <Ionicons
+                name="mic"
+                size={36}
+                color="#ff3b30"
+                style={{ marginBottom: 6 }}
+              />
+              <Text style={styles.listeningText}>Listening…</Text>
+            </View>
+          )}
+
+          <View style={styles.buttonsContainer}>
+            {!jarvisRunning ? (
+              <TouchableOpacity style={styles.buttonStart} onPress={startJarvis}>
+                <Ionicons name="play-circle" size={32} color="#fff" />
+                <Text style={styles.buttonText}>Start Jarvis</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.buttonStop} onPress={stopJarvis}>
+                <Ionicons name="stop-circle" size={32} color="#fff" />
+                <Text style={styles.buttonText}>Stop Jarvis</Text>
+              </TouchableOpacity>
+            )}
           </View>
-        ))}
-      </ScrollView>
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    padding: 10,
-  },
-  chatContainer: {
-    paddingBottom: 20,
+  container: { flex: 1, backgroundColor: "#0a0a0a", padding: 16 },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#00e5ff",
+    textAlign: "center",
+    marginVertical: 10,
   },
   message: {
-    maxWidth: "75%",
+    marginVertical: 6,
     padding: 10,
-    borderRadius: 10,
-    marginVertical: 5,
+    borderRadius: 12,
+    maxWidth: "80%",
   },
-  userMsg: {
-    backgroundColor: "#005CFF",
+  userBubble: {
+    backgroundColor: "#1e88e5",
     alignSelf: "flex-end",
   },
-  jarvisMsg: {
-    backgroundColor: "#262626",
+  jarvisBubble: {
+    backgroundColor: "#212121",
     alignSelf: "flex-start",
   },
-  msgText: {
+  messageText: { color: "#fff", fontSize: 16 },
+  buttonsContainer: {
+    position: "absolute",
+    bottom: 30,
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 20,
+  },
+  buttonStart: {
+    backgroundColor: "#00c853",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 30,
+  },
+  buttonStop: {
+    backgroundColor: "#d50000",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 30,
+  },
+  buttonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  listeningContainer: {
+    position: "absolute",
+    bottom: 100,
+    alignSelf: "center",
+    alignItems: "center",
+  },
+  listeningText: {
+    color: "#ff3b30",
+    fontSize: 16,
+    fontWeight: "500",
   },
 });
