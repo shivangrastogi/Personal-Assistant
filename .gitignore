@@ -46,3 +46,11 @@ Backend/FUNCTION/SPEAK/outputs/
 
 # Ignore RAR archives
 *.rar
+
+# Ignore TTS_MINIMAL folder
+Backend/DATA/TTS_MINIMAL/
+
+Backend/DATA/LISTEN MODAL/
+Backend/DATA/SPEAK MODAL/
+
+
