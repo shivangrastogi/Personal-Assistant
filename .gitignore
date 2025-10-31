@@ -48,4 +48,4 @@ Backend/FUNCTION/SPEAK/outputs/
 *.rar
 
 # Ignore TTS_MINIMAL folder
-Backend/DATA/TTS_MINIMAL/
+# Backend/DATA/TTS_MINIMAL/
